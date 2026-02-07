@@ -1,0 +1,28 @@
+name: dwm
+channels:
+  - defaults
+dependencies:
+  - python=3.13
+  - numpy
+  - scipy
+  - pandas
+  - tqdm
+  - scikit-learn
+  - matplotlib
+  - statsmodels
+  - onnx
+  - onnxruntime
+  - ipykernel
+  - openpyxl
+  - pyyaml
+  - pip
+  - pip:
+    - gymnasium==1.2.0
+    - networkx==3.5
+    - pillow==11.3.0
+    - coloredlogs==15.0.1
+    - humanfriendly==10.0
+    - cloudpickle==3.1.1
+    - torch==2.7.1
+    - torchvision==0.22.1
+    - torchaudio==2.7.1

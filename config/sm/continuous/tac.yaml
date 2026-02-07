@@ -1,0 +1,36 @@
+env:
+  env_name: sm
+  plant_data_path: data/sm/data.json
+
+eval:
+  # out_root: output
+  out_dir: output/sm_dt_cont/tac/online
+  overwrite: true
+  steps_env: 41000
+  reps: 40
+  base_seed: 77
+
+tac:
+  deltas: [0.05, 0.1, 0.2, 0.5, 1.0]
+
+  # online learning 
+  learn_seed: 42
+  learn_steps: 41000
+  n_eigs: 2
+  beta: 0.333333333333
+  update_interval: 100
+  min_k_for_updates: 100
+
+detector:
+  false_alarm_rate: 0.005
+  eta_burn_in: 5000
+
+attack:
+  # replay attack
+  attack_onset: 4000
+  attack_len: -1
+  replay_from: 4000
+  history_seed: 999
+
+plots:
+  save_learning_plots: true

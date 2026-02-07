@@ -1,0 +1,96 @@
+env:
+  env_name: dt
+  plant_data_path: data/dt/data.json
+  env_cfg:
+    w1: 0.35
+    w2: 0.35
+    w3: 0.3
+    p_geom: 1.0e-3
+    window_size: null
+    delta_t: 0
+    n_mc: 2000
+    q_prior: 0.05
+    detector:
+      alpha: 0.01
+
+eval:
+  # this is for normal simulation
+  # out_dir: output/dt/simulation
+  # this is for RL evaluation
+  # out_dir: output/dt/evaluate
+  # this is for constant covariance evaluation
+  out_dir: output/dt/advantage
+  overwrite: true
+  steps_env: 2000
+  reps: 40
+  base_seed: 12234
+  base_beta_seed: 6789
+
+runs:
+  # ---- no watermark ----
+  # - watermark: {mode: none}
+  #   policy: {type: none}
+  #   attack: {type: none}
+
+  # - watermark: {mode: none}
+  #   policy: {type: none}
+  #   attack:
+  #     type: replay
+  #     onset_t: 200
+  #     replay:
+  #       start_idx: 200
+  #       wrap: false
+  #       history:
+  #         mode: run_nominal_once
+  #         seed: 12
+  #         beta_seed: 223
+
+  # ---- constant covariance baseline ----
+  - watermark:
+      mode: constant_cov
+      U: [[1e0]]
+    policy: {type: none}
+    attack: {type: none}
+
+  - watermark:
+      mode: constant_cov
+      U: [[1e0]]
+    policy: {type: none}
+    attack:
+      type: replay
+      onset_t: 200
+      replay:
+        start_idx: 200
+        wrap: false
+        history:
+          mode: run_nominal_once
+          seed: 12
+          beta_seed: 223
+
+  # ---- learned DDPG watermarking (uses U = cov_from_action(action)) ----
+  # - watermark: {mode: from_action}
+  #   policy:
+  #     type: ddpg
+  #     ckpt_dir: output/dt/train
+  #     which: best
+  #     explore: false
+  #     device: cpu
+  #   attack: {type: none}
+
+  # - watermark: {mode: from_action}
+  #   policy:
+  #     type: ddpg
+  #     ckpt_dir: output/dt/train
+  #     which: best
+  #     explore: false
+  #     device: cpu
+  #   attack:
+  #     type: replay
+  #     onset_t: 200
+  #     replay:
+  #       start_idx: 200
+  #       wrap: false
+  #       history:
+  #         mode: run_nominal_once
+  #         seed: 123
+  #         beta_seed: 223

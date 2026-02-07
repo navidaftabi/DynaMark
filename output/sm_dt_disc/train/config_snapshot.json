@@ -1,0 +1,48 @@
+{
+  "config_path": "/Users/navid/Library/CloudStorage/OneDrive-UW/Research/Projects/Controller Attack Recovery/experiments/DynaMark/config/sm/discrete/train.yaml",
+  "config": {
+    "env": {
+      "env_name": "sm_dt_disc",
+      "plant_data_path": "data/sm/data.json",
+      "env_cfg": {
+        "w1": 0.35,
+        "w2": 0.35,
+        "w3": 0.3,
+        "p_geom": 0.001,
+        "window_size": null,
+        "delta_t": 0,
+        "n_mc": 2000,
+        "q_prior": 0.05,
+        "detector": {
+          "alpha": 0.1
+        }
+      }
+    },
+    "train": {
+      "out_dir": "output/sm_dt_disc/train",
+      "seed": 1234,
+      "beta_seed": 7890,
+      "episodes": 200,
+      "max_steps": 41000,
+      "eval_every": 5,
+      "eval_episodes": 5,
+      "ckpt_every": 5,
+      "resume": false
+    },
+    "ddpg": {
+      "hidden_dim": 64,
+      "actor_lr": "1e-3",
+      "critic_lr": "1e-3",
+      "gamma": 0.99,
+      "tau": 0.005,
+      "buffer_size": 100000000,
+      "batch_size": 512,
+      "warmup_steps": 82000,
+      "eps_start": 0.995,
+      "eps_end": 0.05,
+      "eps_decay": 0.995,
+      "target_update_every": 100,
+      "grad_clip": 1.0
+    }
+  }
+}

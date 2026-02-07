@@ -1,0 +1,91 @@
+env:
+  env_name: sm_dt_disc
+  plant_data_path: data/sm/data.json
+  env_cfg:
+    w1: 0.35
+    w2: 0.35
+    w3: 0.3
+    p_geom: 1.0e-3
+    window_size: null
+    delta_t: 0
+    n_mc: 2000
+    q_prior: 0.05
+    detector:
+      alpha: 0.005
+
+eval:
+  # this is for normal simulation
+  # out_dir: output/sm_dt_disc/simulation
+  out_dir: output/sm_dt_disc/evaluate
+  overwrite: true
+  steps_env: 41000
+  reps: 30
+  base_seed: 12234
+  base_beta_seed: 6789
+
+runs:
+  # ---- no watermark ----
+  # - watermark: {mode: none}
+  #   policy: {type: none}
+  #   attack: {type: none}
+
+  # - watermark: {mode: none}
+  #   policy: {type: none}
+  #   attack:
+  #     type: replay
+  #     onset_t: 2 # this is decision epoch not t_fast t_fast=1000 is 2nd decision epoch
+  #     replay:
+  #       start_idx: 2
+  #       wrap: false
+  #       history:
+  #         mode: run_nominal_once
+  #         seed: 123
+  #         beta_seed: 223
+
+  # ---- constant covariance baseline ----
+  # - watermark:
+  #     mode: constant_cov
+  #     U: [[0.0]]
+  #   policy: {type: none}
+  #   attack: {type: none}
+
+  # - watermark:
+  #     mode: constant_cov
+  #     U: [[0.0]]
+  #   policy: {type: none}
+  #   attack:
+  #     type: replay
+  #     onset_t: 200
+  #     replay:
+  #       start_idx: 0
+  #       wrap: true
+  #       history:
+  #         mode: run_nominal_once
+
+  # ---- learned DDPG watermarking (uses U = cov_from_action(action)) ----
+  - watermark: {mode: from_action}
+    policy:
+      type: ddpg
+      ckpt_dir: output/sm_dt_disc/train
+      which: latest
+      explore: false
+      device: cpu
+    attack: {type: none}
+
+  - watermark: {mode: from_action}
+    policy:
+      type: ddpg
+      ckpt_dir: output/sm_dt_disc/train
+      which: latest
+      explore: false
+      device: cpu
+    attack:
+      type: replay
+      onset_t: 8
+      replay:
+        start_idx: 8
+        wrap: false
+        history:
+          mode: run_nominal_once
+          seed: 123
+          beta_seed: 223
