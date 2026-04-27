@@ -66,6 +66,99 @@ python -m src.train.train_ddpg --config config/sm/discrete/train.yaml
 Training artifacts are saved under `output/<case>/train/` by default (e.g., `ckpt_best.pt`, `episodes.jsonl`, `learning_curve.png`). Exact paths are defined in the YAML configs.
 
 ---
+### Non-Gaussian MSD workflow (offline $\hat{\beta}_t$ lookup)
+
+The MSD case supports a `non-Gaussian noise/residual distribution` in which the detector miss-probability $\hat{\beta}_t(U)$ is calibrated offline and then used during training/evaluation through a lookup table.
+
+#### What this adds:
+- **Non-Gaussian plant noise** for the MSD environment (configured in `data/msd/data.json`, or overridden during calibration).
+- **Offline calibration** of:
+  - an empirical detector threshold `g_tilde`, and
+  - a lookup table `beta_hat_t_u` over a grid of watermark variances and replay-onset times.
+- **Lookup-based belief update** during MSD training/evaluation via `beta.mode: lookup`.
+
+#### Supported MSD process-noise families:
+The MSD plant supports the following process-noise families through the `noise.family` field in `data/msd/data.json` (or via `noise_override` in `config/msd/calibrate_beta.yaml`):
+
+- `gaussian`: Default zero-mean Gaussian noise with covariance `Q`.
+
+- `student_t`: Zero-mean heavy-tailed Student-\(t\) noise with parameter:
+  - `df`: degrees of freedom (`df > 2` required for finite variance).  
+  The implementation rescales the samples so that the noise covariance matches `Q`.
+
+- `laplace`: Zero-mean coordinatewise Laplace noise, matched to the diagonal variances of `Q`.
+
+- `contaminated_gaussian`: A bursty Gaussian-mixture model with parameters:
+  - `p`: contamination probability
+  - `kappa`: variance inflation factor for burst samples  
+  The implementation chooses the base covariance so that the overall covariance matches `Q` in expectation.
+
+Example `data/msd/data.json` configuration for Student-\(t\) noise:
+```json
+"noise": {
+  "family": "student_t",
+  "df": 5
+}
+```
+Example calibration-time override:
+```yaml
+noise_override:
+  noise:
+    family: student_t
+    df: 5
+```
+
+
+#### 1) Calibrate the MSD lookup table
+The calibration config is `config/msd/calibrate_beta.yaml`. In the current setup it uses:
+- output directory: `output/msd/beta_calibration`
+- watermark grid `U_grid`
+- onset grid `tau_grid`
+- optional non-Gaussian override, e.g. Student-\(t\) noise via:
+  ```yaml
+  noise_override:
+    noise:
+      family: student_t
+      df: 5
+  ```
+Run:
+```bash
+python -m src.eval.calibrate_beta --config config/msd/calibrate_beta.yaml
+```
+This creates:
+```yaml
+output/msd/beta_calibration/beta_lookup.npz
+```
+The `.npz` file stores the offline calibration artifacts, including:
+- `U_grid`
+- `tau_grid`
+- `tau_weights`
+- `g_tilde`
+- `beta_hat_t_u_tau`
+- `beta_hat_t_u`
+
+#### 2) Train MSD with lookup beta
+
+The MSD training config (`config/msd/train.yaml`) can be set to use the offline lookup through:
+```yaml
+env:
+  env_cfg:
+    beta:
+      mode: lookup
+      lookup_path: output/msd/beta_calibration/beta_lookup.npz
+```
+Then train as usual:
+```bash
+python -m src.train.train_ddpg --config config/msd/train.yaml
+```
+Notes:
+- The current lookup implementation assumes the MSD watermark variance is scalar (`U.shape == (1,1)`).
+- If `detector.g_tilde_override` is provided in the YAML, that value is used as the detector threshold; otherwise, the environment uses `g_tilde` stored in the lookup file when available.
+- The calibration script is intended for the MSD case and currently uses `src/eval/calibrate_beta.py`.
+
+
+
+---
 
 ### Evaluate a trained policy
 

@@ -10,8 +10,12 @@ from gymnasium import spaces
 from .plants.base import PlantBase
 from .core.detector import ChiSquareDetector
 from .core.belief import ReplayBeliefFilter
-from .core.beta_models import ChiSquareBetaMC
-from .core.beta_models import MCBetaConfig
+from .core.beta_models import (
+    BetaLookup, 
+    BetaLookupConfig, 
+    ChiSquareBetaMC, 
+    MCBetaConfig
+    )
 from .core.covariance import cov_from_action
 
 
@@ -56,25 +60,58 @@ class DynaMarkEnv(gym.Env):
 
         det_cfg = cfg.get("detector", cfg)
         self.alpha = float(det_cfg.get("alpha", cfg.get("alpha", 0.01)))
+        g_tilde_override = det_cfg.get("g_tilde_override", None)
 
         bel_cfg = cfg.get("belief", cfg)
         q_prior = float(bel_cfg.get("q_prior", bel_cfg.get("q", cfg.get("q", 0.05))))
         p_geom = float(bel_cfg.get("p_geom", cfg.get("p_geom", 1e-3)))
 
-        self.detector = ChiSquareDetector(alpha=self.alpha, dof=self.n)
-        self.belief = self._make_belief(q_prior=q_prior, alpha=self.alpha, p_geom=p_geom)
-
         beta_cfg_in = cfg.get("beta", {})
-        beta_kwargs = dict(beta_cfg_in)
-        beta_kwargs.setdefault("alpha", self.alpha)
-        beta_kwargs.setdefault("p_geom", p_geom)
-        beta_kwargs.setdefault("window_size", None)
-        beta_kwargs.setdefault("delta_t", 1)
-        beta_kwargs.setdefault("n_mc", 1000)
-        beta_kwargs.setdefault("seed", int(cfg.get("beta_seed", 0)))
+        beta_mode = str(beta_cfg_in.get("mode", "mc_gaussian")).lower()
 
-        beta_cfg = MCBetaConfig(**beta_kwargs)
-        self.beta_model = ChiSquareBetaMC(dof=self.n, u_dim=self.d, cfg=beta_cfg)
+        if beta_mode in {"mc_gaussian", "mc", "gaussian"}:
+            beta_kwargs = dict(beta_cfg_in)
+            beta_kwargs.pop("mode", None)
+            beta_kwargs.setdefault("alpha", self.alpha)
+            beta_kwargs.setdefault("p_geom", p_geom)
+            beta_kwargs.setdefault("delta_t", 1)
+            beta_kwargs.setdefault("n_mc", 1000)
+            beta_kwargs.setdefault("seed", int(cfg.get("beta_seed", 0)))
+
+            beta_cfg = MCBetaConfig(**beta_kwargs)
+            self.beta_model = ChiSquareBetaMC(dof=self.n, u_dim=self.d, cfg=beta_cfg)
+
+        elif beta_mode in {"lookup", "nongaussian_lookup"}:
+            beta_cfg = BetaLookupConfig(
+                lookup_path=beta_cfg_in["lookup_path"],
+                clip=beta_cfg_in.get("clip", True),
+                eps=beta_cfg_in.get("eps", 1e-12),
+            )
+            self.beta_model = BetaLookup(dof=self.n, u_dim=self.d, cfg=beta_cfg)
+            if g_tilde_override is not None:
+                detector_g_tilde = float(g_tilde_override)
+            elif self.beta_model.g_tilde is not None:
+                detector_g_tilde = self.beta_model.g_tilde
+            else:
+                print("Warning: no g_tilde found in beta lookup; using alpha for detector threshold.")
+                detector_g_tilde = None
+        else:
+            raise ValueError(
+                f"Unsupported beta.mode='{beta_mode}'. "
+                "Use 'mc_gaussian' or 'lookup'."
+            )
+        
+        self.detector = ChiSquareDetector(
+            alpha=None if detector_g_tilde is not None else self.alpha,
+            dof=self.n,
+            g_tilde=detector_g_tilde
+        )
+
+        self.belief = ReplayBeliefFilter(
+            q_prior=q_prior,
+            alpha=self.alpha,
+            p_geom=p_geom
+        )
 
         act_dim = _chol_action_dim(self.d)
         low = np.full((act_dim,), -50.0, dtype=np.float32)
@@ -87,13 +124,6 @@ class DynaMarkEnv(gym.Env):
         )
 
         self.t_dec = 0
-
-    @staticmethod
-    def _make_belief(q_prior: float, alpha: float, p_geom: float):
-        try:
-            return ReplayBeliefFilter(q_prior=q_prior, alpha=alpha, p_geom=p_geom)
-        except TypeError:
-            return ReplayBeliefFilter({"q_prior": q_prior, "alpha": alpha, "p_geom": p_geom})
 
     def reset(self, *, seed: Optional[int] = None, options=None):
         super().reset(seed=seed)

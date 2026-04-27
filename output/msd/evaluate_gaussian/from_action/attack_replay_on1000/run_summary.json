@@ -1,0 +1,313 @@
+{
+  "summaries": [
+    {
+      "rep": 0,
+      "steps_executed": 4000,
+      "return": 723.1234083773198,
+      "terminated": true
+    },
+    {
+      "rep": 1,
+      "steps_executed": 4000,
+      "return": 682.3868037411758,
+      "terminated": true
+    },
+    {
+      "rep": 2,
+      "steps_executed": 4000,
+      "return": 672.4902063374359,
+      "terminated": true
+    },
+    {
+      "rep": 3,
+      "steps_executed": 4000,
+      "return": 586.4650880971097,
+      "terminated": true
+    },
+    {
+      "rep": 4,
+      "steps_executed": 4000,
+      "return": 758.4934965387944,
+      "terminated": true
+    },
+    {
+      "rep": 5,
+      "steps_executed": 4000,
+      "return": 689.6601197505112,
+      "terminated": true
+    },
+    {
+      "rep": 6,
+      "steps_executed": 4000,
+      "return": 697.3950007402996,
+      "terminated": true
+    },
+    {
+      "rep": 7,
+      "steps_executed": 4000,
+      "return": 628.2441426602228,
+      "terminated": true
+    },
+    {
+      "rep": 8,
+      "steps_executed": 4000,
+      "return": 674.892760277704,
+      "terminated": true
+    },
+    {
+      "rep": 9,
+      "steps_executed": 4000,
+      "return": 717.2670459529533,
+      "terminated": true
+    },
+    {
+      "rep": 10,
+      "steps_executed": 4000,
+      "return": 685.8730696045169,
+      "terminated": true
+    },
+    {
+      "rep": 11,
+      "steps_executed": 4000,
+      "return": 646.8359860232958,
+      "terminated": true
+    },
+    {
+      "rep": 12,
+      "steps_executed": 4000,
+      "return": 670.7730081303505,
+      "terminated": true
+    },
+    {
+      "rep": 13,
+      "steps_executed": 4000,
+      "return": 637.8382481781515,
+      "terminated": true
+    },
+    {
+      "rep": 14,
+      "steps_executed": 4000,
+      "return": 725.5385194011853,
+      "terminated": true
+    },
+    {
+      "rep": 15,
+      "steps_executed": 4000,
+      "return": 703.699939029998,
+      "terminated": true
+    },
+    {
+      "rep": 16,
+      "steps_executed": 4000,
+      "return": 666.2667945123349,
+      "terminated": true
+    },
+    {
+      "rep": 17,
+      "steps_executed": 4000,
+      "return": 731.8990177949976,
+      "terminated": true
+    },
+    {
+      "rep": 18,
+      "steps_executed": 4000,
+      "return": 648.2501272419719,
+      "terminated": true
+    },
+    {
+      "rep": 19,
+      "steps_executed": 4000,
+      "return": 718.4676281794808,
+      "terminated": true
+    },
+    {
+      "rep": 20,
+      "steps_executed": 4000,
+      "return": 637.4930997680235,
+      "terminated": true
+    },
+    {
+      "rep": 21,
+      "steps_executed": 4000,
+      "return": 692.5817159772856,
+      "terminated": true
+    },
+    {
+      "rep": 22,
+      "steps_executed": 4000,
+      "return": 658.6251795262624,
+      "terminated": true
+    },
+    {
+      "rep": 23,
+      "steps_executed": 4000,
+      "return": 597.586222741562,
+      "terminated": true
+    },
+    {
+      "rep": 24,
+      "steps_executed": 4000,
+      "return": 695.8482210124868,
+      "terminated": true
+    },
+    {
+      "rep": 25,
+      "steps_executed": 4000,
+      "return": 718.7848570407643,
+      "terminated": true
+    },
+    {
+      "rep": 26,
+      "steps_executed": 4000,
+      "return": 684.3982202017733,
+      "terminated": true
+    },
+    {
+      "rep": 27,
+      "steps_executed": 4000,
+      "return": 671.1707184581325,
+      "terminated": true
+    },
+    {
+      "rep": 28,
+      "steps_executed": 4000,
+      "return": 736.2688710251784,
+      "terminated": true
+    },
+    {
+      "rep": 29,
+      "steps_executed": 4000,
+      "return": 753.2009071018521,
+      "terminated": true
+    },
+    {
+      "rep": 30,
+      "steps_executed": 4000,
+      "return": 622.1005146194229,
+      "terminated": true
+    },
+    {
+      "rep": 31,
+      "steps_executed": 4000,
+      "return": 689.5734112216279,
+      "terminated": true
+    },
+    {
+      "rep": 32,
+      "steps_executed": 4000,
+      "return": 719.2705717531568,
+      "terminated": true
+    },
+    {
+      "rep": 33,
+      "steps_executed": 4000,
+      "return": 665.4990640766392,
+      "terminated": true
+    },
+    {
+      "rep": 34,
+      "steps_executed": 4000,
+      "return": 719.9661798281456,
+      "terminated": true
+    },
+    {
+      "rep": 35,
+      "steps_executed": 4000,
+      "return": 673.8016069474899,
+      "terminated": true
+    },
+    {
+      "rep": 36,
+      "steps_executed": 4000,
+      "return": 635.897753788486,
+      "terminated": true
+    },
+    {
+      "rep": 37,
+      "steps_executed": 4000,
+      "return": 644.3741663147871,
+      "terminated": true
+    },
+    {
+      "rep": 38,
+      "steps_executed": 4000,
+      "return": 637.5664512611041,
+      "terminated": true
+    },
+    {
+      "rep": 39,
+      "steps_executed": 4000,
+      "return": 643.3304882796582,
+      "terminated": true
+    }
+  ],
+  "config": {
+    "env": {
+      "env_name": "msd",
+      "plant_data_path": "data/msd/data.json",
+      "env_cfg": {
+        "w1": 0.1,
+        "w2": 0.35,
+        "w3": 0.55,
+        "p_geom": 0.001,
+        "window_size": null,
+        "delta_t": 0,
+        "n_mc": 2000,
+        "q_prior": 0.05,
+        "detector": {
+          "alpha": 0.005
+        }
+      }
+    },
+    "eval": {
+      "out_dir": "output/msd/evaluate",
+      "overwrite": true,
+      "steps_env": 4000,
+      "reps": 40,
+      "base_seed": 129,
+      "base_beta_seed": 678
+    },
+    "runs": [
+      {
+        "watermark": {
+          "mode": "from_action"
+        },
+        "policy": {
+          "type": "ddpg",
+          "ckpt_dir": "output/msd/train",
+          "which": "latest",
+          "explore": false,
+          "device": "cpu"
+        },
+        "attack": {
+          "type": "none"
+        }
+      },
+      {
+        "watermark": {
+          "mode": "from_action"
+        },
+        "policy": {
+          "type": "ddpg",
+          "ckpt_dir": "output/msd/train",
+          "which": "latest",
+          "explore": false,
+          "device": "cpu"
+        },
+        "attack": {
+          "type": "replay",
+          "onset_t": 1000,
+          "replay": {
+            "start_idx": 1000,
+            "wrap": false,
+            "history": {
+              "mode": "run_nominal_once",
+              "seed": 123,
+              "beta_seed": 2233
+            }
+          }
+        }
+      }
+    ]
+  }
+}

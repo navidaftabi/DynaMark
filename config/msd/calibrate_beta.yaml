@@ -1,0 +1,27 @@
+env:
+  env_name: msd
+  plant_data_path: data/msd/data.json
+  detector:
+    alpha: 0.005
+
+calibration:
+  out_dir: output/msd/beta_calibration
+  nominal_rollouts: 100
+  attack_rollouts: 100
+  base_seed: 123
+  history_seed_offset: 10000
+  attack_seed_offset: 20000
+
+  U_grid: [0.0, 1.0e-7, 1.0e-6, 1.0e-5, 1.0e-4, 1.0e-3, 5.0e-3, 1.0e-2, 5.0e-2, 1.0e-1, 5.0e-1, 1.0]
+  tau_grid: [500, 1000, 1500, 2000, 2500, 3000]
+  tau_weighting: geometric   # or uniform
+  # tau_weights: [ ... ]     # optional explicit weights
+
+  replay_start_mode: match_onset
+  replay_start_idx: null
+  wrap_history: false
+
+  noise_override:
+    noise:
+      family: student_t
+      df: 5

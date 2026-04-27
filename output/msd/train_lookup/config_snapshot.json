@@ -1,0 +1,53 @@
+{
+  "config_path": "/Users/navid/Library/CloudStorage/OneDrive-UW/Research/Projects/Controller Attack Recovery/experiments/DynaMark/config/msd/train.yaml",
+  "config": {
+    "env": {
+      "env_name": "msd",
+      "plant_data_path": "data/msd/data.json",
+      "env_cfg": {
+        "w1": 0.1,
+        "w2": 0.35,
+        "w3": 0.55,
+        "p_geom": 0.001,
+        "delta_t": 0,
+        "n_mc": 2000,
+        "q_prior": 0.05,
+        "detector": {
+          "alpha": 0.005,
+          "g_tilde_override": 12.0
+        },
+        "beta": {
+          "mode": "lookup",
+          "lookup_path": "output/msd/beta_calibration/beta_lookup.npz"
+        },
+        "beta_seed": 790
+      }
+    },
+    "train": {
+      "out_dir": "output/msd/train_lookup",
+      "seed": 124,
+      "beta_seed": 790,
+      "episodes": 50,
+      "max_steps": 5000,
+      "eval_every": 5,
+      "eval_episodes": 5,
+      "ckpt_every": 5,
+      "resume": false
+    },
+    "ddpg": {
+      "hidden_dim": 64,
+      "actor_lr": "1e-3",
+      "critic_lr": "1e-3",
+      "gamma": 0.99,
+      "tau": 0.005,
+      "buffer_size": 1000000,
+      "batch_size": 512,
+      "warmup_steps": 8000,
+      "eps_start": 1.95,
+      "eps_end": 0.05,
+      "eps_decay": 0.995,
+      "target_update_every": 1,
+      "grad_clip": 1.0
+    }
+  }
+}

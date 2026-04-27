@@ -5,7 +5,10 @@ from .factory import EnvSpec, make_env, make_plant, make_from_spec
 # core 
 from .core.detector import ChiSquareDetector
 from .core.belief import ReplayBeliefFilter
-from .core.beta_models import ChiSquareBetaMC, MCBetaConfig
+from .core.beta_models import (
+    BetaLookup, BetaLookupConfig, 
+    ChiSquareBetaMC, MCBetaConfig
+)
 
 # plants
 from .plants.base import PlantBase
@@ -27,6 +30,8 @@ __all__ = [
     "ReplayBeliefFilter",
     "ChiSquareBetaMC",
     "MCBetaConfig",
+    "BetaLookup",
+    "BetaLookupConfig",
 
     # plants
     "PlantBase",

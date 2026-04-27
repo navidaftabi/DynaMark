@@ -9,13 +9,25 @@ from ..core.utils import _as_2d_mat
 
 
 class NonlinearMSD:
-    """Single MSD, EXACT slide discretization."""
-    def __init__(self, m=1.0, k1=0.5, k2=1.0, b1=1.0, b2=0.1, Ts=0.01, Q=None, seed=0):
+    """Single MSD, exact slide discretization, with configurable process-noise family."""
+    def __init__(
+            self,
+            m=1.0,
+            k1=0.5,
+            k2=1.0,
+            b1=1.0,
+            b2=0.1,
+            Ts=0.01,
+            Q=None,
+            noise_cfg: Optional[Dict[str, Any]] = None,
+            seed=0,
+    ):
         self.m = float(m)
         self.k1 = float(k1); self.k2 = float(k2)
         self.b1 = float(b1); self.b2 = float(b2)
         self.Ts = float(Ts)
         self.Q = np.array(Q if Q is not None else np.diag([1e-6, 1e-6]), dtype=float)
+        self.noise_cfg = dict(noise_cfg or {"family": "gaussian"})
         self.rng = np.random.default_rng(seed)
 
         if np.allclose(self.Q, np.diag(np.diag(self.Q))):
@@ -23,13 +35,17 @@ class NonlinearMSD:
             self._chol = None
         else:
             self._diag_std = None
-            self._chol = np.linalg.cholesky(self.Q + 1e-15*np.eye(self.Q.shape[0]))
+            self._chol = np.linalg.cholesky(self.Q + 1e-15 * np.eye(self.Q.shape[0]))
+        
+        # for Laplace and contaminated-Gaussian, use the diagonal of Q as target variance
+        self._diag_var = np.diag(self.Q).astype(float)
+        self._dim = int(self.Q.shape[0])
 
     def b(self, v):
-        return self.b1*v + self.b2*(v**3)
+        return self.b1 * v + self.b2 * (v ** 3)
 
     def k(self, p):
-        return self.k1*p + self.k2*(p**3)
+        return self.k1 * p + self.k2 * (p ** 3)
 
     def g(self, y, u, F):
         # y is shape (2,) in this internal function
@@ -37,12 +53,65 @@ class NonlinearMSD:
         p_next = p + self.Ts * v
         v_next = v - (self.Ts/self.m) * ( self.b(v) + self.k(p) - u - F )
         return np.array([p_next, v_next], dtype=float)
-
-    def sample_w(self):
+    
+    def _sample_gaussian(self) -> np.ndarray:
         if self._diag_std is not None:
-            return self.rng.normal(loc=0.0, scale=self._diag_std, size=2)
-        z = self.rng.normal(size=2)
+            return self.rng.normal(loc=0.0, scale=self._diag_std, size=self._dim)
+        z = self.rng.normal(size=self._dim)
         return self._chol @ z
+    
+    def _sample_student_t(self, df: float) -> np.ndarray:
+        if df <= 2:
+            raise ValueError("student_t noise requires df > 2 for finite variance.")
+        # scale so that Cov[w] = Q
+        scale = np.sqrt((df - 2.0) / df)
+        if self._diag_std is not None:
+            z = self.rng.standard_t(df=df, size=self._dim)
+            return scale * self._diag_std * z
+        z = self.rng.standard_t(df=df, size=self._dim)
+        return scale * (self._chol @ z)
+    
+    def _sample_laplace(self) -> np.ndarray:
+        # coordinate-wise Laplace matched to diag(Q): Var = 2 b^2
+        # if Q is not diagonal, we still use the diagonal variances as a pragmatic robustness test.
+        b = np.sqrt(np.maximum(self._diag_var, 0.0) / 2.0)
+        return self.rng.laplace(loc=0.0, scale=b, size=self._dim)
+    
+    def _sample_contaminated_gaussian(self, p: float, kappa: float) -> np.ndarray:
+        if not (0.0 <= p < 1.0):
+            raise ValueError("contaminated_gaussian requires 0 <= p < 1.")
+        if kappa <= 0.0:
+            raise ValueError("contaminated_gaussian requires kappa > 0.")
+        # choose base covariance so total covariance matches Q in expectation:
+        # (1-p) Q_base + p * kappa * Q_base = Q
+        denom = (1.0 - p) + p * kappa
+        if denom <= 0.0:
+            raise ValueError("Invalid contaminated-Gaussian parameters.")
+        if self._diag_std is not None:
+            base_std = self._diag_std / np.sqrt(denom)
+            burst = self.rng.uniform() < p
+            scale = np.sqrt(kappa) if burst else 1.0
+            return self.rng.normal(loc=0.0, scale=scale * base_std, size=self._dim)
+        base_chol = self._chol / np.sqrt(denom)
+        burst = self.rng.uniform() < p
+        scale = np.sqrt(kappa) if burst else 1.0
+        z = self.rng.normal(size=self._dim)
+        return scale * (base_chol @ z)
+    
+    def sample_w(self) -> np.ndarray:
+        family = str(self.noise_cfg.get("family", "gaussian")).lower()
+        if family == "gaussian":
+            return self._sample_gaussian()
+        if family == "student_t":
+            df = float(self.noise_cfg.get("df", 5.0))
+            return self._sample_student_t(df=df)
+        if family == "laplace":
+            return self._sample_laplace()
+        if family == "contaminated_gaussian":
+            p = float(self.noise_cfg.get("p", 0.05))
+            kappa = float(self.noise_cfg.get("kappa", 10.0))
+            return self._sample_contaminated_gaussian(p=p, kappa=kappa)
+        raise ValueError(f"Unsupported MSD noise family: {family}")
 
     def step(self, y, u, F):
         y_det = self.g(y, u, F)
@@ -80,6 +149,9 @@ class MSDNonlinearPlant(PlantBase):
         Q = data.get("Q", np.diag([1e-6, 1e-6]).tolist())
         self.Q = _as_2d_mat(Q, name="Q")
 
+        # process-noise model (default remains Gaussian)
+        self.noise_cfg = dict(data.get("noise", {"family": "gaussian"}))
+
         # exogenous
         self.F0 = float(data.get("F0", 0.0))
 
@@ -103,7 +175,9 @@ class MSDNonlinearPlant(PlantBase):
             m=self.m, 
             k1=self.k1, k2=self.k2, 
             b1=self.b1, b2=self.b2,
-            Ts=self.Ts, Q=self.Q, seed=self._seed
+            Ts=self.Ts, Q=self.Q, 
+            noise_cfg=self.noise_cfg,
+            seed=self._seed
         )
 
         # Jacobian H = ∂g/∂u = [0; Ts/m] 
@@ -121,6 +195,16 @@ class MSDNonlinearPlant(PlantBase):
         if seed is not None:
             self._seed = int(seed)
             self._rng = np.random.default_rng(self._seed)
+
+        # Rebuild the system so its internal RNG is reset too.
+        self.sys = NonlinearMSD(
+            m=self.m,
+            k1=self.k1, k2=self.k2,
+            b1=self.b1, b2=self.b2,
+            Ts=self.Ts, Q=self.Q,
+            noise_cfg=self.noise_cfg,
+            seed=self._seed,
+        )
 
         self._t = 0
         # true and observed start the same
