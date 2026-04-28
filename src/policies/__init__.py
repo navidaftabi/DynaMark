@@ -1,5 +1,6 @@
 from .networks import ActorCholesky, CriticQ
 from .constant import ConstantActionPolicy, ZeroActionPolicy, ConstantPolicy
+from .belief_adaptive import BeliefAdaptiveLinearPolicy
 
 __all__ = [
     "ActorCholesky",
@@ -7,4 +8,5 @@ __all__ = [
     "ConstantPolicy",
     "ConstantActionPolicy",
     "ZeroActionPolicy",
+    "BeliefAdaptiveLinearPolicy",
 ]

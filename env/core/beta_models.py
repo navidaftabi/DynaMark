@@ -37,7 +37,6 @@ class MCBetaConfig:
     """
     alpha: float                  # false alarm rate for chi-square detector
     p_geom: float                 # geometric parameter (attack onset prior)
-    window_size: Optional[int]    # None => use all tau from 0..t; else last window
     delta_t: int = 0              # replay delay in detector steps (>=0)
     n_mc: int = 2000              # MC samples for estimating F_t = P(g_t < gamma | attack)
     seed: Optional[int] = None    # RNG seed for reproducibility

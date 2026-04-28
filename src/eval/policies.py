@@ -49,6 +49,9 @@ def build_policy(policy_cfg: Dict[str, Any], env) -> Policy:
 
     if ptype in ("ddpg", "rl"):
         return build_ddpg_policy(policy_cfg, env)
+    
+    if ptype in ("belief_adaptive", "belief_adaptive_linear", "nonrl_adaptive"):
+        return make_belief_adaptive_linear_policy(policy_cfg, env)
 
     raise ValueError(f"Unknown policy.type='{ptype}'")
 
@@ -146,3 +149,19 @@ def build_ddpg_policy(policy_cfg: Dict[str, Any], env):
             return self.agent.act(obs, explore=self.explore)
 
     return _DDPGPolicy(agent=agent, explore=explore)
+
+def make_belief_adaptive_linear_policy(policy_cfg: dict, env):
+    from ..policies.belief_adaptive import BeliefAdaptiveLinearPolicy, _as_square_cov
+
+    d = int(getattr(env, "d", getattr(env.plant, "u_dim", 1)))
+
+    U_min = _as_square_cov(policy_cfg.get("U_min", 0.0), d, "U_min")
+    U_max = _as_square_cov(policy_cfg.get("U_max"), d, "U_max")
+
+    return BeliefAdaptiveLinearPolicy(
+        U_min=U_min,
+        U_max=U_max,
+        d_index=int(policy_cfg.get("d_index", -1)),
+        d_clip_min=float(policy_cfg.get("d_clip_min", 0.0)),
+        d_clip_max=float(policy_cfg.get("d_clip_max", 1.0)),
+    )

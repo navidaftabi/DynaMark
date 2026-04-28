@@ -80,6 +80,14 @@ class DynaMarkEnv(gym.Env):
 
             beta_cfg = MCBetaConfig(**beta_kwargs)
             self.beta_model = ChiSquareBetaMC(dof=self.n, u_dim=self.d, cfg=beta_cfg)
+            if g_tilde_override is not None:
+                detector_g_tilde = float(g_tilde_override)
+            elif self.alpha is not None:
+                detector_g_tilde = None
+            else:
+                print("Warning: no alpha or g_tilde provided for detector. Using default alpha=0.01 for detector threshold.")
+                detector_g_tilde = None
+                self.alpha = 0.01
 
         elif beta_mode in {"lookup", "nongaussian_lookup"}:
             beta_cfg = BetaLookupConfig(
