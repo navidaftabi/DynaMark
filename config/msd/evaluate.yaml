@@ -21,9 +21,11 @@ eval:
   # this is for normal simulation
   # out_dir: output/msd/simulation
   # this is for constant covariance evaluation
-  # out_dir: output/msd/high_U
+  # out_dir: output/msd/mean_U
   # this is for full evaluation with DynaMark
-  out_dir: output/msd/evaluate_lookup
+  # out_dir: output/msd/evaluate_lookup
+  # this is for belief-adaptive evaluation
+  out_dir: output/msd/nonrl_adaptive
   overwrite: true
   steps_env: 4000
   reps: 40
@@ -52,13 +54,13 @@ runs:
   # ---- constant covariance baseline ----
   # - watermark:
   #     mode: constant_cov
-  #     U: [[0.007]]
+  #     U: [[0.0117]]
   #   policy: {type: none}
   #   attack: {type: none}
 
   # - watermark:
   #     mode: constant_cov
-  #     U: [[0.007]]
+  #     U: [[0.0117]]
   #   policy: {type: none}
   #   attack:
   #     type: replay
@@ -72,22 +74,48 @@ runs:
   #         beta_seed: 223
 
   # ---- learned DDPG watermarking (uses U = cov_from_action(action)) ----
-  - watermark: {mode: from_action}
+  # - watermark: {mode: from_action}
+  #   policy:
+  #     type: ddpg
+  #     ckpt_dir: output/msd/train_lookup
+  #     which: last
+  #     explore: false
+  #     device: cpu
+  #   attack: {type: none}
+
+  # - watermark: {mode: from_action}
+  #   policy:
+  #     type: ddpg
+  #     ckpt_dir: output/msd/train_lookup
+  #     which: last
+  #     explore: false
+  #     device: cpu
+  #   attack:
+  #     type: replay
+  #     onset_t: 1000
+  #     replay:
+  #       start_idx: 1000
+  #       wrap: false
+  #       history:
+  #         mode: run_nominal_once
+  #         seed: 123
+  #         beta_seed: 2233
+
+  # ---- belief-adaptive linear policy ----
+  - name: nonrl_adaptive_normal
+    watermark: {mode: from_action}
     policy:
-      type: ddpg
-      ckpt_dir: output/msd/train_lookup
-      which: last
-      explore: false
-      device: cpu
+      type: nonrl_adaptive
+      U_min: 1.08e-08
+      U_max: 0.0404
     attack: {type: none}
 
-  - watermark: {mode: from_action}
+  - name: nonrl_adaptive_replay
+    watermark: {mode: from_action}
     policy:
-      type: ddpg
-      ckpt_dir: output/msd/train_lookup
-      which: last
-      explore: false
-      device: cpu
+      type: nonrl_adaptive
+      U_min: 1.08e-08
+      U_max: 0.0404
     attack:
       type: replay
       onset_t: 1000
@@ -96,5 +124,5 @@ runs:
         wrap: false
         history:
           mode: run_nominal_once
-          seed: 123
-          beta_seed: 2233
+          seed: 12
+          beta_seed: 223

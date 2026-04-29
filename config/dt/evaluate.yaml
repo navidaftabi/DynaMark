@@ -20,9 +20,9 @@ eval:
   # this is for RL evaluation
   # out_dir: output/dt/evaluate
   # this is for constant covariance evaluation
-  # out_dir: output/dt/advantage
+  out_dir: output/dt/advantage
   # this is for belief-adaptive evaluation
-  out_dir: output/dt/nonrl_adaptive
+  # out_dir: output/dt/nonrl_adaptive
   overwrite: true
   steps_env: 2000
   reps: 40
@@ -39,9 +39,9 @@ runs:
   #   policy: {type: none}
   #   attack:
   #     type: replay
-  #     onset_t: 200
+  #     onset_t: 600
   #     replay:
-  #       start_idx: 200
+  #       start_idx: 600
   #       wrap: false
   #       history:
   #         mode: run_nominal_once
@@ -49,26 +49,26 @@ runs:
   #         beta_seed: 223
 
   # ---- constant covariance baseline ----
-  # - watermark:
-  #     mode: constant_cov
-  #     U: [[1e0]]
-  #   policy: {type: none}
-  #   attack: {type: none}
+  - watermark:
+      mode: constant_cov
+      U: [[1e0]]
+    policy: {type: none}
+    attack: {type: none}
 
-  # - watermark:
-  #     mode: constant_cov
-  #     U: [[1e0]]
-  #   policy: {type: none}
-  #   attack:
-  #     type: replay
-  #     onset_t: 200
-  #     replay:
-  #       start_idx: 200
-  #       wrap: false
-  #       history:
-  #         mode: run_nominal_once
-  #         seed: 12
-  #         beta_seed: 223
+  - watermark:
+      mode: constant_cov
+      U: [[1e0]]
+    policy: {type: none}
+    attack:
+      type: replay
+      onset_t: 600
+      replay:
+        start_idx: 600
+        wrap: false
+        history:
+          mode: run_nominal_once
+          seed: 12
+          beta_seed: 223
 
   # ---- learned DDPG watermarking (uses U = cov_from_action(action)) ----
   # - watermark: {mode: from_action}
@@ -89,9 +89,9 @@ runs:
   #     device: cpu
   #   attack:
   #     type: replay
-  #     onset_t: 200
+  #     onset_t: 600
   #     replay:
-  #       start_idx: 200
+  #       start_idx: 600
   #       wrap: false
   #       history:
   #         mode: run_nominal_once
@@ -99,27 +99,27 @@ runs:
   #         beta_seed: 223
 
   # ---- belief-adaptive linear policy ----
-  - name: nonrl_adaptive_normal
-    watermark: {mode: from_action}
-    policy:
-      type: nonrl_adaptive
-      U_min: 1.0e-7
-      U_max: 1.9e-3
-    attack: {type: none}
+  # - name: nonrl_adaptive_normal
+  #   watermark: {mode: from_action}
+  #   policy:
+  #     type: nonrl_adaptive
+  #     U_min: 1.0e-7
+  #     U_max: 1.9e-3
+  #   attack: {type: none}
 
-  - name: nonrl_adaptive_replay
-    watermark: {mode: from_action}
-    policy:
-      type: nonrl_adaptive
-      U_min: 1.0e-7
-      U_max: 1.9e-3
-    attack:
-      type: replay
-      onset_t: 700
-      replay:
-        start_idx: 700
-        wrap: false
-        history:
-          mode: run_nominal_once
-          seed: 12
-          beta_seed: 223
+  # - name: nonrl_adaptive_replay
+  #   watermark: {mode: from_action}
+  #   policy:
+  #     type: nonrl_adaptive
+  #     U_min: 1.0e-7
+  #     U_max: 1.9e-3
+  #   attack:
+  #     type: replay
+  #     onset_t: 600
+  #     replay:
+  #       start_idx: 600
+  #       wrap: false
+  #       history:
+  #         mode: run_nominal_once
+  #         seed: 12
+  #         beta_seed: 223
