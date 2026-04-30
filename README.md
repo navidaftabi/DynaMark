@@ -28,7 +28,7 @@
   - `src/train/` (DDPG training, checkpointing, logging)  
   - `src/eval/` (rollouts, evaluation pipeline, policies, I/O)  
   - `src/baseline/` (baseline watermarking routines)  
-  - `src/policies/` (policy networks + constant policies)  
+  - `src/policies/` (policy networks + non-RL adaptive + constant policies)  
   - `src/plots/` (timeseries + curves utilities)
 - `data/` — input data files used by experiments
 - `output/` — generated outputs (checkpoints, JSONL logs, rollouts)
@@ -190,7 +190,16 @@ Evaluation results are written under `output/<case>/evaluate/`, typically includ
 python -m src.baseline.run --config config/sm/continuous/tac.yaml
 ```
 #### Constant-Covariance Baselines:
-The routin in `src/eval` can simulate any of the case-studies under constant-covariance baselines. For this baseline, please see the `evaluate.yaml` under `configs/` for each case-study. To run this baseline follow the steps for [policy evaluation](###evaluate-a-trained-policy) after re-configuring the `evaluate.yaml` file.
+The routine in `src/eval` can simulate any of the case-studies under constant-covariance baselines. For this baseline, please see the `evaluate.yaml` under `configs/` for each case-study. To run this baseline follow the steps for [policy evaluation](###evaluate-a-trained-policy) after re-configuring the `evaluate.yaml` file.
+
+#### Non-RL Belief-Adaptive Baseline:
+We also include a simple non-RL adaptive watermarking baseline to separate the effect of adaptation from the effect of RL. This policy is implemented in `src/policies/belief_adaptive.py` and uses the detector belief $d_t$ directly through the fixed rule
+
+$$U_t = U_{\min} + (U_{\max} - U_{\min}) d_t .$$
+
+Unlike DynaMark, this baseline does not learn from rewards, replay buffers, or critic feedback. It only increases the watermark covariance when the detector belief increases. 
+
+For this baseline, please see the `evaluate.yaml` under `configs/` for DT and MSD case-studies. To run this baseline follow the steps for [policy evaluation](###evaluate-a-trained-policy) after re-configuring the `evaluate.yaml` file.
 
 
 ---
