@@ -40,10 +40,11 @@ class ActorCholesky(nn.Module):
     Remaining entries correspond to off-diagonals (unconstrained).
     """
 
-    def __init__(self, obs_dim: int, d: int, hidden_dim: int = 128):
+    def __init__(self, obs_dim: int, d: int, L_max: float, hidden_dim: int = 128):
         super().__init__()
         self.obs_dim = int(obs_dim)
         self.d = int(d)
+        self.L_max = float(L_max)
         self.spec = ActionPackSpec(d=self.d)
 
         self.fc1 = nn.Linear(self.obs_dim, hidden_dim)
@@ -73,6 +74,7 @@ class ActorCholesky(nn.Module):
         x = F.leaky_relu(self.norm3(self.fc3(x)))
 
         diag = torch.abs(self.diag_head(x))
+        # diag = self.L_max * torch.sigmoid(self.diag_head(x))
 
         if self.off_head is not None:
             off = self.off_head(x)

@@ -5,22 +5,25 @@ env:
     w1: 0.35
     w2: 0.35
     w3: 0.3
-    p_geom: 1.0e-2
+    U_max: 1.0
+    p_geom: 8.33e-4 
     window_size: null
     delta_t: 0
     n_mc: 2000
     q_prior: 0.05
     detector:
-      alpha: 0.1
+      alpha: 0.3
+    beta:
+      mode: gaussian
 
 train:
-  out_dir: output/dt/train
+  out_dir: output/dt/reward_grid/train
   seed: 1234
   beta_seed: 7890
-  episodes: 200
+  episodes: 100
   max_steps: 2000
   eval_every: 10
-  eval_episodes: 10
+  eval_episodes: 5
   ckpt_every: 5
   resume: false
 

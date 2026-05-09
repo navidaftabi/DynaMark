@@ -5,6 +5,7 @@ env:
     w1: 0.35
     w2: 0.35
     w3: 0.3
+    U_max: 1.0
     p_geom: 1.0e-3  # 1/env.data.T = 41000?
     window_size: null
     delta_t: 0

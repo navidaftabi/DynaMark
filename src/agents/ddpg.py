@@ -69,8 +69,9 @@ class DDPGAgent:
         torch.manual_seed(int(seed))
 
         # networks
-        self.actor = ActorCholesky(self.obs_dim, self.d, hidden_dim=cfg.hidden_dim).to(self.device)
-        self.actor_t = ActorCholesky(self.obs_dim, self.d, hidden_dim=cfg.hidden_dim).to(self.device)
+        L_max = max(np.abs(action_low).max(), np.abs(action_high).max())
+        self.actor = ActorCholesky(self.obs_dim, self.d, L_max, hidden_dim=cfg.hidden_dim).to(self.device)
+        self.actor_t = ActorCholesky(self.obs_dim, self.d, L_max, hidden_dim=cfg.hidden_dim).to(self.device)
 
         self.critic1 = CriticQ(self.obs_dim, self.act_dim, hidden_dim=cfg.hidden_dim).to(self.device)
         self.critic2 = CriticQ(self.obs_dim, self.act_dim, hidden_dim=cfg.hidden_dim).to(self.device)

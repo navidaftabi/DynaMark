@@ -121,9 +121,11 @@ class DynaMarkEnv(gym.Env):
             p_geom=p_geom
         )
 
+        U_max = float(cfg.get("U_max", 1.0))
+        L_max = np.sqrt(U_max)
         act_dim = _chol_action_dim(self.d)
-        low = np.full((act_dim,), -50.0, dtype=np.float32)
-        high = np.full((act_dim,), 50.0, dtype=np.float32)
+        low = np.full((act_dim,), -L_max, dtype=np.float32)
+        high = np.full((act_dim,), L_max, dtype=np.float32)
         low[: self.d] = 0.0
         self.action_space = spaces.Box(low=low, high=high, dtype=np.float32)
 

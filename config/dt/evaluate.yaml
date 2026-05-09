@@ -5,7 +5,8 @@ env:
     w1: 0.35
     w2: 0.35
     w3: 0.3
-    p_geom: 1.0e-3
+    U_max: 1.0
+    p_geom: 8.33e-4 
     delta_t: 0
     n_mc: 2000
     q_prior: 0.05
@@ -18,9 +19,9 @@ eval:
   # this is for normal simulation
   # out_dir: output/dt/simulation
   # this is for RL evaluation
-  # out_dir: output/dt/evaluate
+  out_dir: output/dt/reward_grid/evaluate
   # this is for constant covariance evaluation
-  out_dir: output/dt/advantage
+  # out_dir: output/dt/advantage
   # this is for belief-adaptive evaluation
   # out_dir: output/dt/nonrl_adaptive
   overwrite: true
@@ -49,44 +50,16 @@ runs:
   #         beta_seed: 223
 
   # ---- constant covariance baseline ----
-  - watermark:
-      mode: constant_cov
-      U: [[1e0]]
-    policy: {type: none}
-    attack: {type: none}
-
-  - watermark:
-      mode: constant_cov
-      U: [[1e0]]
-    policy: {type: none}
-    attack:
-      type: replay
-      onset_t: 600
-      replay:
-        start_idx: 600
-        wrap: false
-        history:
-          mode: run_nominal_once
-          seed: 12
-          beta_seed: 223
-
-  # ---- learned DDPG watermarking (uses U = cov_from_action(action)) ----
-  # - watermark: {mode: from_action}
-  #   policy:
-  #     type: ddpg
-  #     ckpt_dir: output/dt/train
-  #     which: best
-  #     explore: false
-  #     device: cpu
+  # - watermark:
+  #     mode: constant_cov
+  #     U: [[1e0]]
+  #   policy: {type: none}
   #   attack: {type: none}
 
-  # - watermark: {mode: from_action}
-  #   policy:
-  #     type: ddpg
-  #     ckpt_dir: output/dt/train
-  #     which: best
-  #     explore: false
-  #     device: cpu
+  # - watermark:
+  #     mode: constant_cov
+  #     U: [[1e0]]
+  #   policy: {type: none}
   #   attack:
   #     type: replay
   #     onset_t: 600
@@ -95,8 +68,36 @@ runs:
   #       wrap: false
   #       history:
   #         mode: run_nominal_once
-  #         seed: 123
+  #         seed: 12
   #         beta_seed: 223
+
+  # ---- learned DDPG watermarking (uses U = cov_from_action(action)) ----
+  - watermark: {mode: from_action}
+    policy:
+      type: ddpg
+      ckpt_dir: output/dt/reward_grid/train
+      which: last
+      explore: false
+      device: cpu
+    attack: {type: none}
+
+  - watermark: {mode: from_action}
+    policy:
+      type: ddpg
+      ckpt_dir: output/dt/reward_grid/train
+      which: last
+      explore: false
+      device: cpu
+    attack:
+      type: replay
+      onset_t: 600
+      replay:
+        start_idx: 600
+        wrap: false
+        history:
+          mode: run_nominal_once
+          seed: 123
+          beta_seed: 223
 
   # ---- belief-adaptive linear policy ----
   # - name: nonrl_adaptive_normal
